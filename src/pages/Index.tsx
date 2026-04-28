@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
+import KitchenPlanner from "@/components/KitchenPlanner";
 
 const HERO_IMG = "https://cdn.poehali.dev/projects/1e1e25b9-148b-42a8-a65e-b6215ef6cf0a/files/7008296f-d410-4d23-a2f0-d65b3b57e0cc.jpg";
 const SOFA_IMG = "https://cdn.poehali.dev/projects/1e1e25b9-148b-42a8-a65e-b6215ef6cf0a/files/191f7064-a9d1-4b1f-ac18-1c895f9de517.jpg";
@@ -17,13 +18,7 @@ const PORTFOLIO = [
   { id: 3, title: "Пентхаус в Москва-Сити", area: "310 м²", year: "2023", img: WARDROBE_IMG },
 ];
 
-const MATERIALS = ["Дуб натуральный", "Орех американский", "Ясень беленый", "Лак матовый", "Лак глянцевый"];
-const COLORS = ["#1A1A1A", "#3D2B1F", "#6B5040", "#C4A882", "#E8DDD0", "#F5EFE6"];
-const SIZES = [
-  { label: "Ш", min: 60, max: 300, unit: "см" },
-  { label: "В", min: 40, max: 250, unit: "см" },
-  { label: "Г", min: 30, max: 100, unit: "см" },
-];
+
 
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
@@ -44,13 +39,8 @@ function useInView(threshold = 0.15) {
 export default function Index() {
   const [activeSection, setActiveSection] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(0);
-  const [sizes, setSizes] = useState([180, 80, 60]);
-  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
   const [contactForm, setContactForm] = useState({ name: "", phone: "", message: "" });
   const [heroLoaded, setHeroLoaded] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const catalogInView = useInView();
   const portfolioInView = useInView();
@@ -242,117 +232,19 @@ export default function Index() {
       {/* ===== CONFIGURATOR ===== */}
       <section id="configurator" className="py-24 px-8 md:px-16" style={{ background: "#111" }}>
         <div ref={configInView.ref}>
-          <div className="relative mb-16">
+          <div className="relative mb-12">
             <span className="section-num absolute -top-8 -left-4">02</span>
-            <p className="font-golos text-xs tracking-[0.4em] uppercase mb-3" style={{ color: "#C9A96E" }}>Персонализация</p>
+            <p className="font-golos text-xs tracking-[0.4em] uppercase mb-3" style={{ color: "#C9A96E" }}>Планировщик кухни</p>
             <h2 className={`font-cormorant text-5xl md:text-6xl font-light opacity-0-init ${configInView.visible ? "animate-fade-up" : ""}`}
               style={{ color: "#F5EFE6", animationFillMode: "forwards" }}>
               Конфигуратор
             </h2>
+            <p className="font-golos text-sm mt-3 max-w-xl" style={{ color: "rgba(245,239,230,0.4)", lineHeight: 1.7 }}>
+              Задайте размеры комнаты, выберите стену и расставьте корпуса — вид сверху в масштабе 1:1.
+              Перетащите модули для перекомпоновки.
+            </p>
           </div>
-
-          <div className="grid md:grid-cols-2 gap-16 max-w-6xl">
-            <div className="space-y-10">
-              <div>
-                <p className="font-golos text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(245,239,230,0.4)" }}>Материал</p>
-                <div className="flex flex-wrap gap-2">
-                  {MATERIALS.map((m, i) => (
-                    <button key={i} onClick={() => setSelectedMaterial(i)}
-                      className="font-golos text-xs px-4 py-2 border transition-all duration-300"
-                      style={{
-                        borderColor: selectedMaterial === i ? "#C9A96E" : "rgba(255,255,255,0.1)",
-                        color: selectedMaterial === i ? "#C9A96E" : "rgba(245,239,230,0.45)",
-                        background: selectedMaterial === i ? "rgba(201,169,110,0.08)" : "transparent",
-                      }}>
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="font-golos text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(245,239,230,0.4)" }}>Цвет / отделка</p>
-                <div className="flex gap-3">
-                  {COLORS.map((c, i) => (
-                    <button key={i} onClick={() => setSelectedColor(i)}
-                      className="w-8 h-8 rounded-full transition-all duration-300"
-                      style={{
-                        background: c,
-                        border: selectedColor === i ? "2px solid #C9A96E" : "2px solid rgba(255,255,255,0.1)",
-                        boxShadow: selectedColor === i ? "0 0 0 2px rgba(201,169,110,0.3)" : "none",
-                        transform: selectedColor === i ? "scale(1.25)" : "scale(1)",
-                      }} />
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="font-golos text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(245,239,230,0.4)" }}>Размеры</p>
-                {SIZES.map((s, i) => (
-                  <div key={i} className="mb-6">
-                    <div className="flex justify-between mb-2">
-                      <span className="font-golos text-xs tracking-wider" style={{ color: "rgba(245,239,230,0.4)" }}>{s.label}</span>
-                      <span className="font-cormorant text-lg" style={{ color: "#C9A96E" }}>
-                        {sizes[i]} {s.unit}
-                      </span>
-                    </div>
-                    <input type="range" min={s.min} max={s.max} value={sizes[i]}
-                      onChange={e => {
-                        const newSizes = [...sizes];
-                        newSizes[i] = Number(e.target.value);
-                        setSizes(newSizes);
-                      }}
-                      className="w-full cursor-pointer appearance-none h-px"
-                      style={{ accentColor: "#C9A96E", background: "rgba(255,255,255,0.1)" }} />
-                    <div className="flex justify-between mt-1">
-                      <span className="font-golos text-xs" style={{ color: "rgba(245,239,230,0.15)" }}>{s.min}</span>
-                      <span className="font-golos text-xs" style={{ color: "rgba(245,239,230,0.15)" }}>{s.max}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="font-golos text-xs tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(245,239,230,0.4)" }}>Превью</p>
-              <div className="relative border overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.1)", aspectRatio: "4/3" }}>
-                <img src={SOFA_IMG} alt="Превью" className="w-full h-full object-cover"
-                  style={{ filter: "brightness(0.65)", mixBlendMode: "luminosity" }} />
-                <div className="absolute inset-0 flex items-end p-6"
-                  style={{ background: "linear-gradient(to top, rgba(13,13,13,0.85) 0%, transparent 60%)" }}>
-                  <div>
-                    <p className="font-cormorant text-2xl" style={{ color: "#F5EFE6" }}>{MATERIALS[selectedMaterial]}</p>
-                    <p className="font-golos text-xs mt-1 tracking-wider" style={{ color: "rgba(245,239,230,0.4)" }}>
-                      {sizes[0]} × {sizes[1]} × {sizes[2]} см
-                    </p>
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 w-8 h-8 rounded-full"
-                  style={{ background: COLORS[selectedColor], border: "2px solid #C9A96E" }} />
-              </div>
-
-              <div className="mt-6 cursor-pointer transition-colors duration-300 p-6 text-center"
-                style={{ border: "1px dashed rgba(255,255,255,0.15)" }}
-                onClick={() => fileRef.current?.click()}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = "#C9A96E")}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)")}>
-                {uploadedPhoto ? (
-                  <img src={uploadedPhoto} alt="Фото интерьера" className="w-full max-h-40 object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <Icon name="Upload" size={20} style={{ color: "rgba(245,239,230,0.25)" }} />
-                    <p className="font-golos text-xs tracking-wider" style={{ color: "rgba(245,239,230,0.25)" }}>Загрузите фото вашего интерьера</p>
-                    <p className="font-golos text-xs" style={{ color: "rgba(245,239,230,0.15)" }}>JPG, PNG · до 10 МБ</p>
-                  </div>
-                )}
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
-              </div>
-
-              <button onClick={() => scrollTo("contacts")} className="gold-fill-btn w-full mt-6 text-center block">
-                Отправить заявку с параметрами
-              </button>
-            </div>
-          </div>
+          <KitchenPlanner />
         </div>
       </section>
 
